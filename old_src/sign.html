@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Transaction</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Sign Transaction</h1>
+    
+    <div id="transaction-details">Loading transaction details...</div>
+    
+    <div id="checks-container" class="checks-container">
+        <div class="check-step">
+            <h3>Step 1: Initial Check</h3>
+            <button id="check1-btn" onclick="runFirstCheck()" class="check-btn">Run Initial Check</button>
+            <div id="check1-result" class="check-result"></div>
+        </div>
+
+        <div class="check-step">
+            <h3>Step 2: Final Check</h3>
+            <button id="check2-btn" onclick="runSecondCheck()" class="check-btn" disabled>Run Final Check</button>
+            <div id="check2-result" class="check-result"></div>
+        </div>
+    </div>
+
+    <div class="navigation-buttons">
+        <button onclick="window.location.href='index.html'" class="back-btn">Back to Transactions</button>
+    </div>
+
+    <script>
+        let safeAddress, txHash;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            safeAddress = urlParams.get('safeAddress');
+            txHash = urlParams.get('txHash');
+
+            if (!safeAddress || !txHash) {
+                document.getElementById('transaction-details').innerHTML = 
+                    '<p class="error">Missing required parameters</p>';
+                document.getElementById('checks-container').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('transaction-details').innerHTML = `
+                <div class="details-container">
+                    <p><strong>Safe Address:</strong> ${safeAddress}</p>
+                    <p><strong>Transaction Hash:</strong> ${txHash}</p>
+                </div>
+            `;
+        });
+
+        async function runFirstCheck() {
+            const check1Btn = document.getElementById('check1-btn');
+            const check1Result = document.getElementById('check1-result');
+            
+            check1Btn.disabled = true;
+            check1Result.innerHTML = '<p class="loading">Running initial check...</p>';
+
+            try {
+                const response = await fetch(`/api/check1?safeAddress=${encodeURIComponent(safeAddress)}&txHash=${encodeURIComponent(txHash)}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    check1Result.innerHTML = '<p class="success">✅ Initial check passed!</p>';
+                    document.getElementById('check2-btn').disabled = false;
+                } else {
+                    check1Result.innerHTML = `<p class="error">❌ Initial check failed: ${data.error}</p>`;
+                }
+            } catch (error) {
+                check1Result.innerHTML = `<p class="error">❌ Error during initial check: ${error.message}</p>`;
+                check1Btn.disabled = false;
+            }
+        }
+
+        async function runSecondCheck() {
+            const check2Btn = document.getElementById('check2-btn');
+            const check2Result = document.getElementById('check2-result');
+            
+            check2Btn.disabled = true;
+            check2Result.innerHTML = '<p class="loading">Running final check...</p>';
+
+            try {
+                const response = await fetch(`/api/check2?safeAddress=${encodeURIComponent(safeAddress)}&txHash=${encodeURIComponent(txHash)}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    check2Result.innerHTML = '<p class="success">✅ Final check passed!</p>';
+                    // Here you could enable a final "Sign Transaction" button or proceed to next step
+                } else {
+                    check2Result.innerHTML = `<p class="error">❌ Final check failed: ${data.error}</p>`;
+                }
+            } catch (error) {
+                check2Result.innerHTML = `<p class="error">❌ Error during final check: ${error.message}</p>`;
+                check2Btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html> 

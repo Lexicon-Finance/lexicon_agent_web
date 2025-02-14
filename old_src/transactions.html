@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pending Multisig Transactions</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="nav-arrow">
+        <a href="index.html" class="back-arrow">←</a>
+    </div>
+
+    <h1>Pending Multisig Transactions</h1>
+    
+    <div id="input-container">
+        <input type="text" id="safeAddress" placeholder="Enter Safe address (e.g. 0x179a8BDDa1AB5fEF17AAF6Ff0FFCb2875925668F)" value="0x179a8BDDa1AB5fEF17AAF6Ff0FFCb2875925668F" />
+        <button onclick="fetchTransactions()">Fetch Pending Transactions</button>
+    </div>
+
+    <div id="transactions">Enter a Safe address and click Fetch.</div>
+
+    <script>
+        async function fetchTransactions() {
+            const safeAddress = document.getElementById("safeAddress").value.trim();
+            
+            if (!safeAddress) {
+                document.getElementById("transactions").innerHTML = `<p class="error">Please enter a Safe address.</p>`;
+                return;
+            }
+
+            const apiUrl = `https://safe-transaction-sepolia.safe.global/api/v1/safes/${safeAddress}/multisig-transactions/`;
+
+            document.getElementById("transactions").innerHTML = `<p class="loading">Loading transactions...</p>`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: "GET",
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const pendingTransactions = data.results.filter(tx => !tx.isExecuted);
+
+                if (pendingTransactions.length === 0) {
+                    document.getElementById("transactions").innerHTML = `<p>No pending transactions found.</p>`;
+                } else {
+                    const transactionsHtml = pendingTransactions.map((tx, index) => `
+                        <div class="transaction-item" onclick="selectTransaction('${tx.safeTxHash}')">
+                            <h3>Transaction ${index + 1}</h3>
+                            <p><strong>To:</strong> ${tx.to}</p>
+                            <p><strong>Value:</strong> ${tx.value} Wei</p>
+                            <p><strong>Safe TX Hash:</strong> ${tx.safeTxHash}</p>
+                            <button class="select-btn">Select This Transaction</button>
+                        </div>
+                    `).join('');
+                    
+                    document.getElementById("transactions").innerHTML = `
+                        <div class="transactions-list">
+                            ${transactionsHtml}
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                document.getElementById("transactions").innerHTML = `<p class="error">Error: ${error.message}</p>`;
+            }
+        }
+
+        function selectTransaction(txHash) {
+            const safeAddress = document.getElementById("safeAddress").value.trim();
+            window.location.href = `risk-detector.html?safeAddress=${encodeURIComponent(safeAddress)}&txHash=${encodeURIComponent(txHash)}`;
+        }
+    </script>
+
+</body>
+</html> 
