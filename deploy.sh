@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -e
 # Configuration
 PROJECT_ID="lexicon-agent"
 REGION="europe-west1"

@@ -20,7 +20,7 @@ function LandingPage() {
       title: 'Security Officer',
       description: 'Advanced risk detector and intent matcher to keep your journey safe',
       enabled: true,
-      onClick: () => navigate('/transactions')
+      onClick: () => navigate('/instructions')
     },
     {
       icon: '💰',
@@ -38,6 +38,11 @@ function LandingPage() {
 
   return (
     <div className="landing-page">
+      <div className="brand-name">
+        <span className="logo">🤖</span>
+        <span className="name">Lexicon Agent</span>
+      </div>
+      
       <div className="hero-section">
         <h1 className="hero-title">Your AI Partner in Web3</h1>
         <p className="hero-subtitle">Empowering your Web3 journey with AI agents</p>
@@ -48,6 +53,28 @@ function LandingPage() {
           <FeatureCard key={index} {...feature} />
         ))}
       </div>
+
+      <style jsx>{`
+        .brand-name {
+          position: absolute;
+          top: 20px;
+          left: 30px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 24px;
+          font-weight: 600;
+          color: white;
+        }
+
+        .logo {
+          font-size: 28px;
+        }
+
+        .name {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+      `}</style>
     </div>
   )
 }

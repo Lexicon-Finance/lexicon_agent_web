@@ -1,10 +1,13 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import BackArrow from '../components/BackArrow'
 import TransactionModal from '../components/TransactionModal'
 
 function TransactionsPage() {
-  const [safeAddress, setSafeAddress] = useState('0x179a8BDDa1AB5fEF17AAF6Ff0FFCb2875925668F')
+  const [safeAddress, setSafeAddress] = useState(() => {
+    const location = useLocation();
+    return location.state?.safeAddress || '';
+  })
   const [transactions, setTransactions] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -55,7 +58,7 @@ function TransactionsPage() {
   return (
     <div>
       <BackArrow to="/" />
-      <h1>Pending Multisig Transactions</h1>
+      <h1>Select a Pending Multisig Transaction to Analyze</h1>
       
       <div id="input-container">
         <input
@@ -81,7 +84,7 @@ function TransactionsPage() {
                   className="transaction-item" 
                   onClick={() => selectTransaction(tx.safeTxHash)}
                 >
-                  <h3>Transaction {index + 1}</h3>
+                  <h3>Safe Transaction #{tx.nonce}</h3>
                   <p><strong>To:</strong> {tx.to}</p>
                   <p><strong>Value:</strong> {tx.value} Wei</p>
                   <p><strong>Safe TX Hash:</strong> {tx.safeTxHash}</p>
